@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Love Heart Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+            font-family: monospace;
+        }
+        /* Яркие надписи контура */
+        
+        .particle {
+            position: absolute;
+            color: red;
+            font-size: 22px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.6);
+            transition: opacity 1.2s ease, transform 0.8s ease, text-shadow 1.2s ease;
+            text-shadow: 0 0 0px red;
+        }
+        /* Тёмные надписи фона */
+        
+        .bgParticle {
+            position: absolute;
+            color: #440000;
+            font-size: 18px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+        /* Текст в центре */
+        
+        #centerText {
+            position: absolute;
+            left: 54%;
+            /* ← чуть правее */
+            top: 50%;
+            transform: translate(-50%, -45%);
+            color: red;
+            font-size: 34px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 2s ease;
+            pointer-events: none;
+            white-space: nowrap;
+            text-shadow: 0 0 10px red, 0 0 18px red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="centerText">Ясечка</div>
+
+    <script>
+        const phrase = "я тебя люблю";
+
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+
+        function heartPoint(t, scale = 18) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+            return {
+                x: W / 2 + x * scale,
+                y: H / 2 - y * scale
+            };
+        }
+
+        // контур
+        const contour = [];
+        for (let t = 0; t < Math.PI * 2; t += 0.06) {
+            contour.push(heartPoint(t, 18));
+        }
+
+        // фон
+        const backgroundPoints = [];
+        for (let t = 0; t < Math.PI * 2; t += 0.03) {
+            backgroundPoints.push(heartPoint(t, 14));
+        }
+
+        // перемешиваем контур → появление с двух сторон
+        for (let i = contour.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [contour[i], contour[j]] = [contour[j], contour[i]];
+        }
+
+        // фоновые надписи
+        backgroundPoints.forEach((p, i) => {
+            const div = document.createElement("div");
+            div.className = "bgParticle";
+            div.textContent = phrase;
+
+            div.style.left = (p.x + (Math.random() * 40 - 20)) + "px";
+            div.style.top = (p.y + (Math.random() * 40 - 20)) + "px";
+
+            document.body.appendChild(div);
+
+            setTimeout(() => {
+                div.style.opacity = 0.4;
+            }, i * 20);
+        });
+
+        // контур — шикарная анимация появления
+        contour.forEach((p, i) => {
+            const div = document.createElement("div");
+            div.className = "particle";
+            div.textContent = phrase;
+
+            div.style.left = p.x + "px";
+            div.style.top = p.y + "px";
+
+            document.body.appendChild(div);
+
+            // рандомная задержка для живого эффекта
+            const delay = 600 + Math.random() * 1200 + i * 40;
+
+            setTimeout(() => {
+                div.style.opacity = 1;
+                div.style.transform = "scale(1)";
+                div.style.textShadow = "0 0 10px red, 0 0 18px red";
+            }, delay);
+        });
+
+        // появление "Ясечка"
+        setTimeout(() => {
+            document.getElementById("centerText").style.opacity = 1;
+        }, 600 + contour.length * 40 + 2000);
+    </script>
+
+</body>
+
+</html>
